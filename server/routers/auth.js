@@ -5,9 +5,9 @@ const User =mongoose.model("User")
 const bcrypt = require('bcrypt')
 
 
-router.get('/',(req,res)=>{
-    res.send('hello')
-})
+// router.get('/',(req,res)=>{
+//     res.send('hello')
+// })
 
 router.post('/signup',(req,res)=>{
   //  console.log(req.body)
@@ -43,6 +43,35 @@ router.post('/signup',(req,res)=>{
       console.log(err)
   })
  //res.json({message:"successfully added"})
+})
+
+router.post('/signin',(req,res)=>{
+    const {email,password} = req.body
+    if(!email || !password){
+        return   res.status(422).json({error:"please enter all the fields"})
+    }
+    User.findOne({email:email})
+    .then(savedUser =>{
+        console.log(savedUser)
+        if(!savedUser){
+            return res.status(422).json({error:"invalid email or password"})
+        }
+        bcrypt.compare(password,savedUser.password)
+        .then(doMatch =>{
+            if(doMatch){
+                return res.json({message:"user succesfully signed in"})
+            }
+            else{
+                return res.status(422).json({error:"email or password invalid"})
+            }
+        })
+        .catch(err => {
+            console.log(err)
+        })      
+    })
+    .catch(err => {
+        console.log(err)
+    })   
 })
 
 module.exports = router
